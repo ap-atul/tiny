@@ -28,8 +28,9 @@ The App has no internet permission. It is architecturally incapable of sending a
 
 tiny requests only the permissions required to function as an Android home screen launcher:
 
-- **Query installed apps** — to display your app drawer and pinned apps.
-- **Set as default launcher** — to function as your home screen.
+- **Query installed apps** (`QUERY_ALL_PACKAGES`) — to display your app drawer and pinned apps.
+- **Set as default launcher** — to function as your home screen (declared via `HOME` intent filter).
+- **Network state** (`ACCESS_NETWORK_STATE`) — to display whether you are on Wi-Fi or mobile data. This is a read-only check of the system connectivity state; no data is transmitted anywhere.
 
 No permissions are used to access contacts, location, camera, microphone, files, or any other personal data.
 

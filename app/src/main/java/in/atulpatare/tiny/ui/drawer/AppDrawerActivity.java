@@ -137,7 +137,7 @@ public class AppDrawerActivity extends Activity {
     private void showMenu(AppInfo app) {
         new AlertDialog.Builder(this)
                 .setTitle(app.name)
-                .setItems(new String[]{"Add to home", "App info"}, (d, w) -> {
+                .setItems(new String[]{"add to home", "app info"}, (d, w) -> {
                     if (w == 0) addToHome(app);
                     else openAppInfo(app.packageName);
                 }).show();
@@ -152,7 +152,7 @@ public class AppDrawerActivity extends Activity {
             for (String p : csv.split(",")) pkgs.add(p.trim());
         }
         if (pkgs.size() >= 5) {
-            android.widget.Toast.makeText(this, "Home screen is full (5/5)", android.widget.Toast.LENGTH_SHORT).show();
+            android.widget.Toast.makeText(this, "home screen is full (5/5)", android.widget.Toast.LENGTH_SHORT).show();
             return;
         }
         if (!pkgs.contains(app.packageName)) {

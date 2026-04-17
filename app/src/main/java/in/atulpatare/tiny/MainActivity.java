@@ -258,8 +258,8 @@ public class MainActivity extends Activity {
     private void tickClock() {
         boolean h24 = android.text.format.DateFormat.is24HourFormat(this);
         String timeFmt = h24 ? "HH:mm" : "h:mm";
-        tvTime.setText(new SimpleDateFormat(timeFmt, Locale.getDefault()).format(new Date()));
-        tvDate.setText(new SimpleDateFormat("EEEE, MMMM d", Locale.getDefault()).format(new Date()));
+        tvTime.setText(new SimpleDateFormat(timeFmt, Locale.getDefault()).format(new Date()).toLowerCase());
+        tvDate.setText(new SimpleDateFormat("EEEE, MMMM d", Locale.getDefault()).format(new Date()).toLowerCase());
     }
 
     // ── Battery ───────────────────────────────────────────────────────────────
@@ -312,7 +312,7 @@ public class MainActivity extends Activity {
         if (next != null) {
             String fmt = new SimpleDateFormat("EEE, h:mm a", Locale.getDefault())
                     .format(new Date(next.getTriggerTime()));
-            tvAlarm.setText("⏰  " + fmt);
+            tvAlarm.setText("⏰  " + fmt.toLowerCase());
             tvAlarm.setVisibility(View.VISIBLE);
         } else {
             tvAlarm.setVisibility(View.GONE);
@@ -328,7 +328,7 @@ public class MainActivity extends Activity {
 
     private void openSettingsMenu() {
         new AlertDialog.Builder(this)
-                .setItems(new String[]{"Edit home apps", "Set as default launcher"}, (d, w) -> {
+                .setItems(new String[]{"edit home apps", "set as default launcher"}, (d, w) -> {
                     if (w == 0)
                         startActivityForResult(new Intent(this, AppSelectActivity.class), 1);
                     else startActivity(new Intent(Settings.ACTION_HOME_SETTINGS));
@@ -343,7 +343,7 @@ public class MainActivity extends Activity {
     private void showAppMenu(AppInfo app, int pos) {
         new AlertDialog.Builder(this)
                 .setTitle(app.name)
-                .setItems(new String[]{"Remove from home", "App info"}, (d, w) -> {
+                .setItems(new String[]{"remove from home", "app info"}, (d, w) -> {
                     if (w == 0) removeFromHome(pos);
                     else openAppInfo(app.packageName);
                 }).show();

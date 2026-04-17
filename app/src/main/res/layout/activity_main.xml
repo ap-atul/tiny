@@ -80,7 +80,7 @@
             android:letterSpacing="-0.03"
             android:textColor="@color/text_primary"
             android:textStyle="bold"
-            android:textSize="82sp" />
+            android:textSize="75sp" />
 
         <TextView
             android:id="@+id/tv_date"

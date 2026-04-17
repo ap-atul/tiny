@@ -1,10 +1,10 @@
 <resources>
     <string name="app_name">tiny</string>
-    <string name="search_apps">Search apps…</string>
+    <string name="search_apps">search apps…</string>
     <string name="settings_icon">⚙</string>
-    <string name="choose_home_apps">Choose home apps</string>
-    <string name="filter_apps">Filter apps…</string>
-    <string name="save">Save</string>
-    <string name="wifi">WiFi</string>
-    <string name="data">Data</string>
+    <string name="choose_home_apps">choose home apps</string>
+    <string name="filter_apps">filter apps…</string>
+    <string name="save">save</string>
+    <string name="wifi">wifi</string>
+    <string name="data">data</string>
 </resources>

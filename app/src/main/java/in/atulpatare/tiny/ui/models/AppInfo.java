@@ -9,7 +9,7 @@ public class AppInfo {
     public final Drawable icon;
 
     public AppInfo(String name, String packageName, Drawable icon) {
-        this.name = name;
+        this.name = name.toLowerCase();
         this.packageName = packageName;
         this.icon = icon;
     }
