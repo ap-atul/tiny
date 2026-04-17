@@ -7,7 +7,11 @@ No feeds. No widgets. No noise. Just your apps, the time, and silence.
 ---
 
 <a href="https://play.google.com/store/apps/details?id=in.atulpatare.tiny"><img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" width="200px"></a>
+ 
+ or 
 
+<a href="https://github.com/ap-atul/tiny/releases/latest">get it from github</a>
+ 
 --- 
 
 ## Screenshots
