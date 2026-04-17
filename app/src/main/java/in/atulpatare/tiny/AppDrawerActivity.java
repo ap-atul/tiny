@@ -1,0 +1,165 @@
+package in.atulpatare.tiny;
+
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.os.Bundle;
+import android.provider.Settings;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.View;
+import android.view.WindowInsets;
+import android.widget.EditText;
+import android.widget.TextView;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class AppDrawerActivity extends AppCompatActivity {
+
+    private AppAdapter adapter;
+    private TextView tvCount;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_app_drawer);
+
+        applyWindowInsets();
+
+        RecyclerView rv = findViewById(R.id.rv_apps);
+        EditText etSearch = findViewById(R.id.et_search);
+        tvCount = findViewById(R.id.tv_app_count);
+
+        adapter = new AppAdapter(new AppAdapter.Listener() {
+            @Override
+            public void onTap(AppInfo app) {
+                launch(app.packageName);
+            }
+
+            @Override
+            public void onHold(AppInfo app) {
+                showMenu(app);
+            }
+        });
+
+        rv.setLayoutManager(new LinearLayoutManager(this));
+        rv.setAdapter(adapter);
+
+        etSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int st, int c, int a) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int st, int b, int c) {
+                adapter.filter(s.toString());
+                updateCount();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
+
+        // Focus search and show keyboard
+        etSearch.requestFocus();
+
+        loadAppsAsync();
+    }
+
+    private void applyWindowInsets() {
+        View spacer = findViewById(R.id.status_spacer);
+        findViewById(R.id.drawer_root).setOnApplyWindowInsetsListener((v, insets) -> {
+            spacer.getLayoutParams().height = insets.getInsets(WindowInsets.Type.statusBars()).top;
+            spacer.requestLayout();
+            return insets;
+        });
+    }
+
+    private void loadAppsAsync() {
+        new Thread(() -> {
+            PackageManager pm = getPackageManager();
+            Intent mainIntent = new Intent(Intent.ACTION_MAIN);
+            mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+            List<ResolveInfo> resolveInfos = pm.queryIntentActivities(mainIntent, 0);
+
+            List<AppInfo> apps = new ArrayList<>();
+            for (ResolveInfo ri : resolveInfos) {
+                String name = ri.loadLabel(pm).toString();
+                String pkg = ri.activityInfo.packageName;
+                android.graphics.drawable.Drawable icon = ri.loadIcon(pm);
+                apps.add(new AppInfo(name, pkg, icon));
+            }
+            apps.sort((a, b) -> a.name.compareToIgnoreCase(b.name));
+
+            runOnUiThread(() -> {
+                adapter.setApps(apps);
+                updateCount();
+            });
+        }).start();
+    }
+
+    private void updateCount() {
+        int count = adapter.shownCount();
+        tvCount.setText(count + (count == 1 ? " app" : " apps"));
+    }
+
+    private void launch(String pkg) {
+        Intent intent = getPackageManager().getLaunchIntentForPackage(pkg);
+        if (intent != null) startActivity(intent);
+    }
+
+    private void showMenu(AppInfo app) {
+        new AlertDialog.Builder(this)
+                .setTitle(app.name)
+                .setItems(new String[]{"Add to home", "App info"}, (d, w) -> {
+                    if (w == 0) addToHome(app);
+                    else openAppInfo(app.packageName);
+                }).show();
+    }
+
+    private void addToHome(AppInfo app) {
+        android.content.SharedPreferences prefs =
+                getSharedPreferences(MainActivity.PREFS, MODE_PRIVATE);
+        String csv = prefs.getString(MainActivity.KEY_PINNED, "");
+        List<String> pkgs = new ArrayList<>();
+        if (!csv.isEmpty()) {
+            for (String p : csv.split(",")) pkgs.add(p.trim());
+        }
+        if (pkgs.size() >= 5) {
+            android.widget.Toast.makeText(this, "Home screen is full (5/5)", android.widget.Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (!pkgs.contains(app.packageName)) {
+            pkgs.add(app.packageName);
+            StringBuilder sb = new StringBuilder();
+            for (String p : pkgs) {
+                if (sb.length() > 0) sb.append(",");
+                sb.append(p);
+            }
+            prefs.edit().putString(MainActivity.KEY_PINNED, sb.toString()).apply();
+            android.widget.Toast.makeText(this, app.name + " added to home", android.widget.Toast.LENGTH_SHORT).show();
+        } else {
+            android.widget.Toast.makeText(this, app.name + " is already on home", android.widget.Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void openAppInfo(String pkg) {
+        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        intent.setData(android.net.Uri.parse("package:" + pkg));
+        startActivity(intent);
+    }
+
+    @Override
+    @SuppressWarnings("deprecation")
+    public void onBackPressed() {
+        super.onBackPressed();
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+    }
+}
