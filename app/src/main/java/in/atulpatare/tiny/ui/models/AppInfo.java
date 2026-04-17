@@ -1,4 +1,4 @@
-package in.atulpatare.tiny;
+package in.atulpatare.tiny.ui.models;
 
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;

@@ -1,8 +1,12 @@
-package in.atulpatare.tiny;
+package in.atulpatare.tiny.ui.drawer;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.text.Editable;
@@ -11,16 +15,20 @@ import android.view.View;
 import android.view.WindowInsets;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.window.OnBackInvokedDispatcher;
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class AppDrawerActivity extends AppCompatActivity {
+import in.atulpatare.tiny.Config;
+import in.atulpatare.tiny.R;
+import in.atulpatare.tiny.ui.models.AppInfo;
+
+public class AppDrawerActivity extends Activity {
 
     private AppAdapter adapter;
     private TextView tvCount;
@@ -76,7 +84,17 @@ public class AppDrawerActivity extends AppCompatActivity {
     private void applyWindowInsets() {
         View spacer = findViewById(R.id.status_spacer);
         findViewById(R.id.drawer_root).setOnApplyWindowInsetsListener((v, insets) -> {
-            spacer.getLayoutParams().height = insets.getInsets(WindowInsets.Type.statusBars()).top;
+            int topInset;
+            int bottomInset;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                topInset = insets.getInsets(WindowInsets.Type.statusBars()).top;
+                bottomInset = insets.getInsets(WindowInsets.Type.navigationBars()).bottom;
+            } else {
+                topInset = insets.getSystemWindowInsetTop();
+                bottomInset = insets.getSystemWindowInsetBottom();
+            }
+
+            spacer.getLayoutParams().height = topInset;
             spacer.requestLayout();
             return insets;
         });
@@ -105,6 +123,7 @@ public class AppDrawerActivity extends AppCompatActivity {
         }).start();
     }
 
+    @SuppressLint("SetTextI18n")
     private void updateCount() {
         int count = adapter.shownCount();
         tvCount.setText(count + (count == 1 ? " app" : " apps"));
@@ -126,8 +145,8 @@ public class AppDrawerActivity extends AppCompatActivity {
 
     private void addToHome(AppInfo app) {
         android.content.SharedPreferences prefs =
-                getSharedPreferences(MainActivity.PREFS, MODE_PRIVATE);
-        String csv = prefs.getString(MainActivity.KEY_PINNED, "");
+                getSharedPreferences(Config.PREFS, MODE_PRIVATE);
+        String csv = prefs.getString(Config.KEY_PINNED, "");
         List<String> pkgs = new ArrayList<>();
         if (!csv.isEmpty()) {
             for (String p : csv.split(",")) pkgs.add(p.trim());
@@ -143,7 +162,7 @@ public class AppDrawerActivity extends AppCompatActivity {
                 if (sb.length() > 0) sb.append(",");
                 sb.append(p);
             }
-            prefs.edit().putString(MainActivity.KEY_PINNED, sb.toString()).apply();
+            prefs.edit().putString(Config.KEY_PINNED, sb.toString()).apply();
             android.widget.Toast.makeText(this, app.name + " added to home", android.widget.Toast.LENGTH_SHORT).show();
         } else {
             android.widget.Toast.makeText(this, app.name + " is already on home", android.widget.Toast.LENGTH_SHORT).show();
@@ -156,10 +175,10 @@ public class AppDrawerActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    @NonNull
     @Override
-    @SuppressWarnings("deprecation")
-    public void onBackPressed() {
-        super.onBackPressed();
+    public OnBackInvokedDispatcher getOnBackInvokedDispatcher() {
         overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+        return super.getOnBackInvokedDispatcher();
     }
 }

@@ -1,18 +1,21 @@
-package in.atulpatare.tiny;
+package in.atulpatare.tiny.ui.selector;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.view.WindowInsets;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -20,7 +23,11 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-public class AppSelectActivity extends AppCompatActivity {
+import in.atulpatare.tiny.Config;
+import in.atulpatare.tiny.R;
+import in.atulpatare.tiny.ui.models.AppInfo;
+
+public class AppSelectActivity extends Activity {
 
     private AppSelectAdapter adapter;
     private TextView tvCount;
@@ -41,7 +48,7 @@ public class AppSelectActivity extends AppCompatActivity {
         // Load currently pinned packages into an ordered set
         LinkedHashSet<String> current = loadCurrentPinned();
 
-        adapter = new AppSelectAdapter(current, count -> updateCount(count));
+        adapter = new AppSelectAdapter(current, this::updateCount);
 
         rv.setLayoutManager(new LinearLayoutManager(this));
         rv.setAdapter(adapter);
@@ -70,16 +77,31 @@ public class AppSelectActivity extends AppCompatActivity {
 
     private void applyWindowInsets() {
         View spacer = findViewById(R.id.status_spacer);
+        LinearLayout saveBtnContainer = findViewById(R.id.save_btn_container);
+
         spacer.setOnApplyWindowInsetsListener((v, insets) -> {
-            v.getLayoutParams().height = insets.getInsets(WindowInsets.Type.statusBars()).top;
+            int topInset;
+            int bottomInset;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                topInset = insets.getInsets(WindowInsets.Type.statusBars()).top;
+                bottomInset = insets.getInsets(WindowInsets.Type.navigationBars()).bottom;
+            } else {
+                topInset = insets.getSystemWindowInsetTop();
+                bottomInset = insets.getSystemWindowInsetBottom();
+            }
+
+            v.getLayoutParams().height = topInset;
             v.requestLayout();
+
+            saveBtnContainer.setPadding(0, 0, 0, bottomInset);
+
             return insets;
         });
     }
 
     private LinkedHashSet<String> loadCurrentPinned() {
-        SharedPreferences p = getSharedPreferences(MainActivity.PREFS, MODE_PRIVATE);
-        String csv = p.getString(MainActivity.KEY_PINNED, "");
+        SharedPreferences p = getSharedPreferences(Config.PREFS, MODE_PRIVATE);
+        String csv = p.getString(Config.KEY_PINNED, "");
         LinkedHashSet<String> set = new LinkedHashSet<>();
         if (!csv.isEmpty()) {
             for (String pkg : csv.split(",")) set.add(pkg.trim());
@@ -107,6 +129,7 @@ public class AppSelectActivity extends AppCompatActivity {
         }).start();
     }
 
+    @SuppressLint("SetTextI18n")
     private void updateCount(int count) {
         tvCount.setText(count + "/5");
     }
@@ -120,8 +143,8 @@ public class AppSelectActivity extends AppCompatActivity {
             if (sb.length() > 0) sb.append(",");
             sb.append(p);
         }
-        getSharedPreferences(MainActivity.PREFS, MODE_PRIVATE)
-                .edit().putString(MainActivity.KEY_PINNED, sb.toString()).apply();
+        getSharedPreferences(Config.PREFS, MODE_PRIVATE)
+                .edit().putString(Config.KEY_PINNED, sb.toString()).apply();
 
         setResult(RESULT_OK);
         finish();

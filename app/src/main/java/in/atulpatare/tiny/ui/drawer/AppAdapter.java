@@ -1,28 +1,25 @@
-package in.atulpatare.tiny;
+package in.atulpatare.tiny.ui.drawer;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
 
-public class AppSelectAdapter extends RecyclerView.Adapter<AppSelectAdapter.VH> {
+import in.atulpatare.tiny.R;
+import in.atulpatare.tiny.ui.models.AppInfo;
 
-    private static final int MAX = 5;
-    private final LinkedHashSet<String> selected;
+public class AppAdapter extends RecyclerView.Adapter<AppAdapter.VH> {
+
     private final Listener listener;
     private List<AppInfo> allApps = new ArrayList<>();
     private List<AppInfo> shown = new ArrayList<>();
-    public AppSelectAdapter(LinkedHashSet<String> currentPinned, Listener listener) {
-        this.selected = currentPinned;
+    public AppAdapter(Listener listener) {
         this.listener = listener;
     }
 
@@ -45,33 +42,26 @@ public class AppSelectAdapter extends RecyclerView.Adapter<AppSelectAdapter.VH> 
         notifyDataSetChanged();
     }
 
-    public LinkedHashSet<String> getSelected() {
-        return selected;
+    public int shownCount() {
+        return shown.size();
     }
 
     @NonNull
     @Override
     public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_app_select, parent, false);
+                .inflate(R.layout.item_app_drawer, parent, false);
         return new VH(v);
     }
 
     @Override
     public void onBindViewHolder(@NonNull VH h, int position) {
         AppInfo app = shown.get(position);
-        h.icon.setImageDrawable(app.icon);
         h.name.setText(app.name);
-        h.check.setChecked(selected.contains(app.packageName));
-
-        h.itemView.setOnClickListener(v -> {
-            if (selected.contains(app.packageName)) {
-                selected.remove(app.packageName);
-            } else if (selected.size() < MAX) {
-                selected.add(app.packageName);
-            }
-            notifyItemChanged(h.getAdapterPosition());
-            listener.onChanged(selected.size());
+        h.itemView.setOnClickListener(v -> listener.onTap(app));
+        h.itemView.setOnLongClickListener(v -> {
+            listener.onHold(app);
+            return true;
         });
     }
 
@@ -81,19 +71,17 @@ public class AppSelectAdapter extends RecyclerView.Adapter<AppSelectAdapter.VH> 
     }
 
     public interface Listener {
-        void onChanged(int count);
+        void onTap(AppInfo app);
+
+        void onHold(AppInfo app);
     }
 
     static class VH extends RecyclerView.ViewHolder {
-        final ImageView icon;
         final TextView name;
-        final CheckBox check;
 
         VH(View v) {
             super(v);
-            icon = v.findViewById(R.id.app_icon);
             name = v.findViewById(R.id.app_name);
-            check = v.findViewById(R.id.app_check);
         }
     }
 }

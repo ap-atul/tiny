@@ -33,11 +33,11 @@
         </activity>
 
         <activity
-            android:name=".AppDrawerActivity"
+            android:name=".ui.drawer.AppDrawerActivity"
             android:exported="false" />
 
         <activity
-            android:name=".AppSelectActivity"
+            android:name=".ui.selector.AppSelectActivity"
             android:exported="false" />
 
     </application>

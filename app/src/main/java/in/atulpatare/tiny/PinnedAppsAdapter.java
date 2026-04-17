@@ -3,7 +3,6 @@ package in.atulpatare.tiny;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -11,6 +10,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import in.atulpatare.tiny.ui.models.AppInfo;
 
 public class PinnedAppsAdapter extends RecyclerView.Adapter<PinnedAppsAdapter.VH> {
 
@@ -34,18 +35,17 @@ public class PinnedAppsAdapter extends RecyclerView.Adapter<PinnedAppsAdapter.VH
     @Override
     public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_pinned_app, parent, false);
+                .inflate(R.layout.item_app_drawer, parent, false);
         return new VH(v);
     }
 
     @Override
     public void onBindViewHolder(@NonNull VH h, int position) {
         AppInfo app = apps.get(position);
-        h.icon.setImageDrawable(app.icon);
         h.name.setText(app.name);
         h.itemView.setOnClickListener(v -> listener.onTap(app));
         h.itemView.setOnLongClickListener(v -> {
-            listener.onHold(app, h.getAdapterPosition());
+            listener.onHold(app, h.getBindingAdapterPosition());
             return true;
         });
     }
@@ -61,13 +61,11 @@ public class PinnedAppsAdapter extends RecyclerView.Adapter<PinnedAppsAdapter.VH
         void onHold(AppInfo app, int position);
     }
 
-    static class VH extends RecyclerView.ViewHolder {
-        final ImageView icon;
+    public static class VH extends RecyclerView.ViewHolder {
         final TextView name;
 
         VH(View v) {
             super(v);
-            icon = v.findViewById(R.id.app_icon);
             name = v.findViewById(R.id.app_name);
         }
     }

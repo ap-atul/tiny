@@ -1,6 +1,9 @@
 package in.atulpatare.tiny;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -22,8 +25,6 @@ import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -33,22 +34,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity {
+import in.atulpatare.tiny.ui.drawer.AppDrawerActivity;
+import in.atulpatare.tiny.ui.models.AppInfo;
+import in.atulpatare.tiny.ui.selector.AppSelectActivity;
 
-    static final String PREFS = "launcher_prefs";
-    static final String KEY_PINNED = "pinned_csv";
+public class MainActivity extends Activity {
 
-    // Default pinned apps — covers AOSP, Pixel, and Samsung naming variants
-    private static final String[] DEFAULT_PKGS = {
-            "com.android.dialer",
-            "com.google.android.dialer",
-            "com.samsung.android.dialer",
-            "com.android.contacts",
-            "com.android.mms",
-            "com.google.android.apps.messaging",
-            "com.android.camera2",
-            "com.android.settings"
-    };
     private final Handler handler = new Handler(Looper.getMainLooper());
     private TextView tvBattery, tvNet, tvTime, tvDate, tvAlarm;
     private final BroadcastReceiver batteryReceiver = new BroadcastReceiver() {
@@ -99,7 +90,6 @@ public class MainActivity extends AppCompatActivity {
                         WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
             }
         } else {
-            //noinspection deprecation
             getWindow().getDecorView().setSystemUiVisibility(
                     View.SYSTEM_UI_FLAG_FULLSCREEN
                             | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
@@ -133,7 +123,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    @SuppressWarnings("deprecation")
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1) pinnedAdapter.updateApps(loadPinned());
@@ -145,8 +134,15 @@ public class MainActivity extends AppCompatActivity {
         View statusSpacer = findViewById(R.id.status_spacer);
         View rootLayout = findViewById(R.id.root_layout);
         rootLayout.setOnApplyWindowInsetsListener((v, insets) -> {
-            int topInset = insets.getInsets(WindowInsets.Type.statusBars()).top;
-            int bottomInset = insets.getInsets(WindowInsets.Type.navigationBars()).bottom;
+            int topInset;
+            int bottomInset;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                topInset = insets.getInsets(WindowInsets.Type.statusBars()).top;
+                bottomInset = insets.getInsets(WindowInsets.Type.navigationBars()).bottom;
+            } else {
+                topInset = insets.getSystemWindowInsetTop();
+                bottomInset = insets.getSystemWindowInsetBottom();
+            }
 
             statusSpacer.getLayoutParams().height = topInset;
             statusSpacer.requestLayout();
@@ -209,13 +205,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     List<AppInfo> loadPinned() {
-        SharedPreferences p = getSharedPreferences(PREFS, MODE_PRIVATE);
-        String csv = p.getString(KEY_PINNED, "");
+        SharedPreferences p = getSharedPreferences(Config.PREFS, MODE_PRIVATE);
+        String csv = p.getString(Config.KEY_PINNED, "");
         PackageManager pm = getPackageManager();
         List<AppInfo> list = new ArrayList<>();
 
         if (csv.isEmpty()) {
-            for (String pkg : DEFAULT_PKGS) {
+            for (String pkg : Config.DEFAULT_PKGS) {
                 AppInfo info = AppInfo.from(pm, pkg);
                 if (info != null && !listContainsPkg(list, pkg)) {
                     list.add(info);
@@ -237,8 +233,8 @@ public class MainActivity extends AppCompatActivity {
             if (sb.length() > 0) sb.append(",");
             sb.append(p);
         }
-        getSharedPreferences(PREFS, MODE_PRIVATE)
-                .edit().putString(KEY_PINNED, sb.toString()).apply();
+        getSharedPreferences(Config.PREFS, MODE_PRIVATE)
+                .edit().putString(Config.KEY_PINNED, sb.toString()).apply();
     }
 
     private boolean listContainsPkg(List<AppInfo> list, String pkg) {
@@ -268,6 +264,7 @@ public class MainActivity extends AppCompatActivity {
 
     // ── Battery ───────────────────────────────────────────────────────────────
 
+    @SuppressLint("SetTextI18n")
     private void refreshBattery(Intent intent) {
         if (intent == null) {
             intent = registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
@@ -298,9 +295,9 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         if (caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
-            tvNet.setText("WiFi");
+            tvNet.setText(R.string.wifi);
         } else if (caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
-            tvNet.setText("Data");
+            tvNet.setText(R.string.data);
         } else {
             tvNet.setText("");
         }
@@ -308,6 +305,7 @@ public class MainActivity extends AppCompatActivity {
 
     // ── Alarm ─────────────────────────────────────────────────────────────────
 
+    @SuppressLint("SetTextI18n")
     private void refreshAlarm() {
         AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
         AlarmManager.AlarmClockInfo next = am.getNextAlarmClock();
