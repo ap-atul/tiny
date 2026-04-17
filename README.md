@@ -8,7 +8,13 @@ No feeds. No widgets. No noise. Just your apps, the time, and silence.
 
 ## Screenshots
 
-> coming soon
+<p align="center">
+  <img src="screenshots/1.png" width="190" alt="minimal — zero clutter" />
+  <img src="screenshots/2.png" width="190" alt="all there — no distraction just a tool" />
+  <img src="screenshots/3.png" width="190" alt="time — no customisation bs" />
+  <img src="screenshots/4.png" width="190" alt="priority — take back control" />
+  <img src="screenshots/5.png" width="190" alt="easy — just launch and use it" />
+</p>
 
 ---
 
