@@ -6,6 +6,10 @@ No feeds. No widgets. No noise. Just your apps, the time, and silence.
 
 ---
 
+<a href="https://play.google.com/store/apps/details?id=in.atulpatare.tiny"><img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" width="200px"></a>
+
+--- 
+
 ## Screenshots
 
 <p align="center">
@@ -64,21 +68,3 @@ The home screen is the most-opened surface on your phone. tiny keeps it calm —
 ## Privacy
 
 tiny collects no data. See [PRIVACY.md](PRIVACY_POLICY.md) for the full policy.
-
----
-
-## Building
-
-```bash
-git clone https://github.com/atulpatare/tiny
-cd tiny
-./gradlew assembleDebug
-```
-
-Open in Android Studio (Hedgehog or newer) and run on a device or emulator.
-
----
-
-## License
-
-MIT
