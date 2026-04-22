@@ -332,26 +332,12 @@ public class MainActivity extends Activity {
                 .setItems(new String[]{
                         "edit home apps",
                         "set as default launcher",
-                        "more apps by developer ↗"
                 }, (d, w) -> {
                     if (w == 0)
                         startActivityForResult(new Intent(this, AppSelectActivity.class), 1);
                     else if (w == 1)
                         startActivity(new Intent(Settings.ACTION_HOME_SETTINGS));
-                    else
-                        openDevPage();
                 }).show();
-    }
-
-    private void openDevPage() {
-        String devId = "5893797694170029010";
-        Intent play = new Intent(Intent.ACTION_VIEW,
-                android.net.Uri.parse("market://dev?id=" + devId));
-        if (play.resolveActivity(getPackageManager()) == null) {
-            play.setData(android.net.Uri.parse(
-                    "https://play.google.com/store/apps/dev?id=" + devId));
-        }
-        startActivity(play);
     }
 
     private void launch(String packageName) {
